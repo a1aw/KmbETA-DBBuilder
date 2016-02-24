@@ -40,6 +40,7 @@ import javax.swing.JMenu;
 import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
+import javax.swing.JMenuItem;
 
 public class Maunalbuild {
 
@@ -290,12 +291,8 @@ public class Maunalbuild {
 		panel.setBackground(Color.WHITE);
 		frame.getContentPane().add(panel, BorderLayout.CENTER);
 		
-		JLabel lblImg = new JLabel("");
-		lblImg.setHorizontalAlignment(SwingConstants.CENTER);
-		lblImg.setIcon(new ImageIcon(Maunalbuild.class.getResource("/image/icn_kmb.gif")));
-		
-		JLabel lblKmbEtaDatabase = new JLabel("KMB ETA Database Builder");
-		lblKmbEtaDatabase.setFont(new Font("Tahoma", Font.PLAIN, 38));
+		JLabel lblKmbEtaDatabase = new JLabel("Maunal KMB ETA Database Builder");
+		lblKmbEtaDatabase.setFont(new Font("Tahoma", Font.PLAIN, 35));
 		
 		JLabel lblPasteHtmlGenerated = new JLabel("Paste HTML Generated Data here:");
 		
@@ -346,12 +343,13 @@ public class Maunalbuild {
 									.addGap(96)
 									.addComponent(scrollPane_1, GroupLayout.DEFAULT_SIZE, 652, Short.MAX_VALUE))
 								.addGroup(gl_panel.createSequentialGroup()
-									.addComponent(lblImg)
-									.addPreferredGap(ComponentPlacement.UNRELATED)
-									.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-										.addComponent(lblKmbEtaDatabase)
-										.addComponent(lblDatabaseBuilderBy))
-									.addPreferredGap(ComponentPlacement.RELATED)
+									.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING, false)
+										.addGroup(gl_panel.createSequentialGroup()
+											.addComponent(lblKmbEtaDatabase, GroupLayout.PREFERRED_SIZE, 573, GroupLayout.PREFERRED_SIZE)
+											.addPreferredGap(ComponentPlacement.RELATED))
+										.addGroup(gl_panel.createSequentialGroup()
+											.addComponent(lblDatabaseBuilderBy, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+											.addGap(92)))
 									.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
 										.addGroup(gl_panel.createSequentialGroup()
 											.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
@@ -370,8 +368,8 @@ public class Maunalbuild {
 		gl_panel.setVerticalGroup(
 			gl_panel.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel.createSequentialGroup()
-					.addContainerGap()
-					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
+					.addGap(11)
+					.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING)
 						.addGroup(gl_panel.createSequentialGroup()
 							.addGroup(gl_panel.createParallelGroup(Alignment.BASELINE)
 								.addComponent(lblBound)
@@ -383,8 +381,7 @@ public class Maunalbuild {
 								.addComponent(lblBusName))
 							.addPreferredGap(ComponentPlacement.UNRELATED)
 							.addComponent(btnBuildDatabase))
-						.addComponent(lblImg, GroupLayout.PREFERRED_SIZE, 84, GroupLayout.PREFERRED_SIZE)
-						.addGroup(Alignment.TRAILING, gl_panel.createSequentialGroup()
+						.addGroup(gl_panel.createSequentialGroup()
 							.addComponent(lblDatabaseBuilderBy)
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(lblKmbEtaDatabase)))
@@ -396,7 +393,7 @@ public class Maunalbuild {
 							.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 117, GroupLayout.PREFERRED_SIZE))
 						.addComponent(scrollPane_1, GroupLayout.PREFERRED_SIZE, 140, GroupLayout.PREFERRED_SIZE))
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(scrollPane_2, GroupLayout.DEFAULT_SIZE, 392, Short.MAX_VALUE)
+					.addComponent(scrollPane_2, GroupLayout.DEFAULT_SIZE, 397, Short.MAX_VALUE)
 					.addGap(5))
 		);
 		
@@ -436,6 +433,18 @@ public class Maunalbuild {
 		
 		JMenuBar menuBar = new JMenuBar();
 		frame.setJMenuBar(menuBar);
+		
+		JMenu mnBuilder = new JMenu("Builder");
+		menuBar.add(mnBuilder);
+		
+		JMenuItem mntmSwitchToAuto = new JMenuItem("Switch to auto mode");
+		mntmSwitchToAuto.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Autobuild.start();
+				frame.dispose();
+			}
+		});
+		mnBuilder.add(mntmSwitchToAuto);
 		
 		JMenu mnSettings = new JMenu("Settings");
 		menuBar.add(mnSettings);
