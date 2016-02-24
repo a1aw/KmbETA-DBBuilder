@@ -68,6 +68,10 @@ public class Autobuild  {
 	 * Launch the application.
 	 */
 	public static void main(String[] args) {
+		start();
+	}
+	
+	public static void start(){
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
@@ -202,6 +206,7 @@ public class Autobuild  {
 				try {
 					btnSave.setEnabled(false);
 					btnAutobuild.setEnabled(false);
+					pb.setIndeterminate(true);
 					lblStatus.setText("Status: Reloading properties file...");
 					File file = new File("bus_stopdb.properties");
 					if (!file.exists()){
@@ -227,6 +232,7 @@ public class Autobuild  {
 					lblBusstopdbproperties.setText("bus_stopdb.properties (Last Build: " + lastbuild + " Last Bound: " + lastbound + " Last Max Bounds: " + lastmaxbounds + ")");
 					fis.close();
 					in.close();
+					pb.setIndeterminate(false);
 					lblStatus.setText("Status: Ready");
 					btnSave.setEnabled(true);
 					btnAutobuild.setEnabled(true);
