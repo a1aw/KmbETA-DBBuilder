@@ -214,6 +214,7 @@ public class Autobuild  {
 						lblStatus.setText("Status: Ready");
 						btnSave.setEnabled(true);
 						btnAutobuild.setEnabled(true);
+						pb.setIndeterminate(false);
 						return;
 					}
 					FileInputStream fis = new FileInputStream(file);
