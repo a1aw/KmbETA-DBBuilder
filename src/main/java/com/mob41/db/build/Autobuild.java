@@ -56,11 +56,16 @@ import java.awt.event.MouseAdapter;
 import javax.swing.JMenuBar;
 import javax.swing.JMenu;
 import javax.swing.JMenuItem;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
 
 public class Autobuild  {
 	
 	private static final String routedb = "http://www.kmb.hk/ajax/getRouteMapByBusno.php";
 
+	private boolean running = false;
 	private Thread thread;
 	private JFrame frame;
 
@@ -143,6 +148,7 @@ public class Autobuild  {
 	private JMenuBar menuBar;
 	private JMenu mnBuilder;
 	private JMenuItem mntmSwitchToManual;
+	private JComboBox langbox;
 	
 	private void save(){
 		try {
@@ -290,6 +296,7 @@ public class Autobuild  {
 		int j;
 		int x;
 		try {
+			running = true;
 			lblStatus.setText("Setting up");
 			String language = "eng";
 			switch (lang){
@@ -376,8 +383,10 @@ public class Autobuild  {
 			lblStatus.setText("Status: Ready");
 			btnAutobuild.setEnabled(true);
 			JOptionPane.showMessageDialog(null, "Thank you for using this builder!\nPlease put a star on KmbETA-API and\nKmbETA-DBBuilder to support me!");
+			running = false;
 		} catch (Exception e){
 			e.printStackTrace();
+			running = false;
 			lblStatus.setForeground(Color.RED);
 			lblStatus.setText("Status: Error occurred. Check stack trace.");
 			pb.setIndeterminate(true);
@@ -393,9 +402,24 @@ public class Autobuild  {
 	 */
 	private void initialize() {
 		frame = new JFrame();
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent arg0) {
+				if (running){
+					int result = JOptionPane.showConfirmDialog(null, "You are downloading database data. You will lost your data\nif you leave. Are you sure?");
+					if (result == 0){
+						frame.dispose();
+					}
+				}
+				else
+				{
+					frame.dispose();
+				}
+			}
+		});
 		frame.setTitle("KMB ETA Database Builder v1.5 Beta");
-		frame.setBounds(100, 100, 881, 577);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setBounds(100, 100, 958, 654);
+		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		
 		JPanel panel = new JPanel();
 		frame.getContentPane().add(panel, BorderLayout.CENTER);
@@ -408,7 +432,7 @@ public class Autobuild  {
 			public void actionPerformed(ActionEvent arg0) {
 			  new Thread(){
 					public void run(){
-						func(ENGLISH_LANG);
+						func(langbox.getSelectedIndex());
 					}
 				}.start();
 				btnAutobuild.setEnabled(false);
@@ -439,25 +463,30 @@ public class Autobuild  {
 				btnAutobuild.setEnabled(false);
 			}
 		});
+		
+		langbox = new JComboBox();
+		langbox.setModel(new DefaultComboBoxModel(new String[] {"ENGLISH", "CHINESE"}));
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.TRAILING)
 				.addGroup(gl_panel.createSequentialGroup()
 					.addContainerGap()
 					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-						.addComponent(pb, GroupLayout.DEFAULT_SIZE, 845, Short.MAX_VALUE)
-						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 845, Short.MAX_VALUE)
-						.addComponent(lblStatus, GroupLayout.DEFAULT_SIZE, 845, Short.MAX_VALUE)
+						.addComponent(pb, GroupLayout.DEFAULT_SIZE, 922, Short.MAX_VALUE)
+						.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 922, Short.MAX_VALUE)
+						.addComponent(lblStatus, GroupLayout.DEFAULT_SIZE, 922, Short.MAX_VALUE)
 						.addGroup(gl_panel.createSequentialGroup()
-							.addComponent(scrollPane_1, GroupLayout.DEFAULT_SIZE, 251, Short.MAX_VALUE)
+							.addComponent(scrollPane_1, GroupLayout.DEFAULT_SIZE, 244, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(scrollPane_2, GroupLayout.DEFAULT_SIZE, 588, Short.MAX_VALUE))
+							.addComponent(scrollPane_2, GroupLayout.DEFAULT_SIZE, 672, Short.MAX_VALUE))
 						.addGroup(gl_panel.createSequentialGroup()
-							.addComponent(lblKmbEtaDatabase, GroupLayout.DEFAULT_SIZE, 547, Short.MAX_VALUE)
+							.addComponent(lblKmbEtaDatabase, GroupLayout.DEFAULT_SIZE, 540, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnSave, GroupLayout.DEFAULT_SIZE, 63, Short.MAX_VALUE)
+							.addComponent(langbox, 0, 94, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnAutobuild, GroupLayout.DEFAULT_SIZE, 225, Short.MAX_VALUE)))
+							.addComponent(btnSave, GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
+							.addPreferredGap(ComponentPlacement.RELATED)
+							.addComponent(btnAutobuild, GroupLayout.DEFAULT_SIZE, 215, Short.MAX_VALUE)))
 					.addContainerGap())
 		);
 		gl_panel.setVerticalGroup(
@@ -467,6 +496,7 @@ public class Autobuild  {
 					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
 						.addComponent(lblKmbEtaDatabase)
 						.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING, false)
+							.addComponent(langbox, Alignment.LEADING)
 							.addComponent(btnSave, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 							.addComponent(btnAutobuild, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)))
 					.addPreferredGap(ComponentPlacement.RELATED)
@@ -474,11 +504,11 @@ public class Autobuild  {
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(pb, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 294, Short.MAX_VALUE)
+					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-						.addComponent(scrollPane_2, GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE)
-						.addComponent(scrollPane_1, GroupLayout.DEFAULT_SIZE, 113, Short.MAX_VALUE))
+						.addComponent(scrollPane_2, GroupLayout.DEFAULT_SIZE, 142, Short.MAX_VALUE)
+						.addComponent(scrollPane_1, GroupLayout.DEFAULT_SIZE, 142, Short.MAX_VALUE))
 					.addContainerGap())
 		);
 		
@@ -539,8 +569,16 @@ public class Autobuild  {
 		mntmSwitchToManual = new JMenuItem("Switch to Manual Mode");
 		mntmSwitchToManual.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
-				Maunalbuild.start();
-				frame.dispose();
+				if (!running){
+					Maunalbuild.start();
+					frame.dispose();
+				} else {
+					int result = JOptionPane.showConfirmDialog(null, "You are downloading database data. You will lost your data\nif you leave. Are you sure?");
+					if (result == 0){
+						Maunalbuild.start();
+						frame.dispose();
+					}
+				}
 			}
 		});
 		mnBuilder.add(mntmSwitchToManual);

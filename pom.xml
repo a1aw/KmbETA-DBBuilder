@@ -2,7 +2,7 @@
   <modelVersion>4.0.0</modelVersion>
   <groupId>com.mob41.kmbapi</groupId>
   <artifactId>KmbETA-DBBuilder</artifactId>
-  <version>0.0.1-SNAPSHOT</version>
+  <version>1.5.0-BETA</version>
   <name>KmbETA-DBBuilder</name>
   <description>KMB ETA Database Builder</description>
   <dependencies>
