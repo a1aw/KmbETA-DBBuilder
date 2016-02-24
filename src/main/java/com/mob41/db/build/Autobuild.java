@@ -411,12 +411,12 @@ public class Autobuild  {
 				if (running){
 					int result = JOptionPane.showConfirmDialog(null, "You are downloading database data. You will lost your data\nif you leave. Are you sure?");
 					if (result == 0){
-						frame.dispose();
+						System.exit(0);
 					}
 				}
 				else
 				{
-					frame.dispose();
+					System.exit(0);
 				}
 			}
 		});
