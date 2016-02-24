@@ -312,6 +312,7 @@ public class Autobuild  {
 			String busno;
 			String[] busrow;
 			BusDetails busd;
+			langbox.setEnabled(false);
 			List<List<String[]>> buslist;
 			lblStatus.setForeground(Color.BLACK);
 			pb.setIndeterminate(false);
@@ -381,12 +382,14 @@ public class Autobuild  {
 			lblStatus.setText("Status: Building database... this may takes one to two minutes");
 			save();
 			lblStatus.setText("Status: Ready");
+			langbox.setEnabled(true);
 			btnAutobuild.setEnabled(true);
 			JOptionPane.showMessageDialog(null, "Thank you for using this builder!\nPlease put a star on KmbETA-API and\nKmbETA-DBBuilder to support me!");
 			running = false;
 		} catch (Exception e){
 			e.printStackTrace();
 			running = false;
+			langbox.setEnabled(true);
 			lblStatus.setForeground(Color.RED);
 			lblStatus.setText("Status: Error occurred. Check stack trace.");
 			pb.setIndeterminate(true);
