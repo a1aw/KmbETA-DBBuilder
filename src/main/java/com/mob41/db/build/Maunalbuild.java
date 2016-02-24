@@ -41,7 +41,7 @@ import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JSpinner;
 import javax.swing.JToggleButton;
 
-public class BuildKMBdatabase {
+public class Maunalbuild {
 
 	public static String[] bus_db = {
 			"1", "1A", "10", "11", "11B", "11C", "11D", "11K", "11X", "12", "12A",
@@ -257,11 +257,11 @@ public class BuildKMBdatabase {
 	/**
 	 * Launch the application.
 	 */
-	public static void main(String[] args) {
+	public static void start() {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					BuildKMBdatabase window = new BuildKMBdatabase();
+					Maunalbuild window = new Maunalbuild();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
 					e.printStackTrace();
@@ -273,7 +273,7 @@ public class BuildKMBdatabase {
 	/**
 	 * Create the application.
 	 */
-	public BuildKMBdatabase() {
+	public Maunalbuild() {
 		initialize();
 	}
 
@@ -292,7 +292,7 @@ public class BuildKMBdatabase {
 		
 		JLabel lblImg = new JLabel("");
 		lblImg.setHorizontalAlignment(SwingConstants.CENTER);
-		lblImg.setIcon(new ImageIcon(BuildKMBdatabase.class.getResource("/image/icn_kmb.gif")));
+		lblImg.setIcon(new ImageIcon(Maunalbuild.class.getResource("/image/icn_kmb.gif")));
 		
 		JLabel lblKmbEtaDatabase = new JLabel("KMB ETA Database Builder");
 		lblKmbEtaDatabase.setFont(new Font("Tahoma", Font.PLAIN, 38));
