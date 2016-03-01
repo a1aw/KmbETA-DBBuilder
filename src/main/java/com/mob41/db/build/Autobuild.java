@@ -355,7 +355,7 @@ public class Autobuild  {
 						injson = arr.getJSONObject(x);
 						build[0] = Integer.toString(arr.length());
 						build[1] = injson.getString("subarea").replaceAll("[-+.^:,]","");
-						build[2] = Integer.toString(x+1);
+						build[2] = Integer.toString(x);
 						build[3] = injson.getString("title_" + language);
 						busdarr[0] = injson.getString("lat");
 						busdarr[1] = injson.getString("lng");
@@ -420,7 +420,7 @@ public class Autobuild  {
 				}
 			}
 		});
-		frame.setTitle("KMB ETA Database Builder v1.5 Beta");
+		frame.setTitle("KMB ETA Database Builder v1.5.1 Beta");
 		frame.setBounds(100, 100, 958, 654);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		
