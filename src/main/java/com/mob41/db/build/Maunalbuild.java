@@ -322,7 +322,7 @@ public class Maunalbuild {
 		
 		btnbound = new JToggleButton("Bounds mode");
 		
-		JLabel lblDatabaseBuilderBy = new JLabel("Database builder by Anthony Law. (Automation not completed.)");
+		JLabel lblDatabaseBuilderBy = new JLabel("Database builder by Anthony Law. (Not recommend to use manual build. You will be exhausted...)");
 		lblDatabaseBuilderBy.setFont(new Font("Tahoma", Font.PLAIN, 13));
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
