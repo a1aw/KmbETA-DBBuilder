@@ -139,7 +139,6 @@ public class Autobuild  {
 			List<List<String[]>> buslist;
 			List<String[]> boundlist;
 			String busname;
-			System.out.println(Arrays.deepToString(data.toArray()));
 			prop.setProperty("buses", Integer.toString(busamount));
 			pb.setValue(0);
 			pb.setMinimum(0);
@@ -158,7 +157,7 @@ public class Autobuild  {
 					for (st = 0; st < stopamount; st++){
 						prop.setProperty(busname + "-bound" + bd + "-stop" + st + "-stopcode", boundlist.get(st)[1]);
 						prop.setProperty(busname + "-bound" + bd + "-stop" + st + "-stopseq", boundlist.get(st)[2]);
-						prop.setProperty(busname + "-bound" + bd + "-stop" + st + "-stopname", boundlist.get(st)[3]);
+						prop.setProperty(busname + "-bound" + bd + "-stop" + st + "-stopname", new String(boundlist.get(st)[3].getBytes("UTF-8"), "UTF-8"));
 					}
 				}
 			}
@@ -466,14 +465,14 @@ public class Autobuild  {
 				}
 			}
 		});
-		frame.setTitle("KMB ETA Database Builder v1.5.1 Beta");
+		frame.setTitle("KMB ETA Database Builder v1.5.2 Beta");
 		frame.setBounds(100, 100, 958, 654);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		
 		JPanel panel = new JPanel();
 		frame.getContentPane().add(panel, BorderLayout.CENTER);
 		
-		JLabel lblKmbEtaDatabase = new JLabel("KMB ETA Database Builder v1.5 Beta");
+		JLabel lblKmbEtaDatabase = new JLabel("KMB ETA Database Builder v1.5.2 Beta");
 		lblKmbEtaDatabase.setFont(new Font("Tahoma", Font.PLAIN, 33));
 		
 		btnAutobuild = new JButton("Auto-build");
