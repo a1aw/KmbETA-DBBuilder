@@ -8,6 +8,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -111,12 +112,12 @@ public class Autobuild  {
 	private JMenuBar menuBar;
 	private JMenu mnBuilder;
 	private JMenuItem mntmSwitchToManual;
-	private JComboBox langbox;
 	
 	private void save(){
 		try {
 			lblStatus.setText("Status: Preparing for saving...");
 			pb.setIndeterminate(true);
+			
 			if (data == null){
 				lblStatus.setText("Status: Nothing to save. Ready.");
 				pb.setIndeterminate(false);
@@ -124,49 +125,83 @@ public class Autobuild  {
 				btnAutobuild.setEnabled(true);
 				return;
 			}
+			
 			int busamount = data.size();
-			File file = new File("bus_stopdb.properties");
+			
+			File file = new File("kmbeta_db.json");
 			if(!file.exists()){
 				log.append("File not exist. Creating... \n");
 				file.createNewFile();
 			}
-			Properties prop = new Properties();
+			
+			JSONObject outjson = new JSONObject();
+			
 			int b;
 			int bd;
 			int st;
 			int boundamount;
 			int stopamount;
+			
 			List<List<String[]>> buslist;
 			List<String[]> boundlist;
+			
 			String busname;
-			prop.setProperty("buses", Integer.toString(busamount));
+			
 			pb.setValue(0);
 			pb.setMinimum(0);
 			pb.setMaximum(busamount);
+			
+			JSONArray jsonBuses = new JSONArray();
+			outjson.put("buses", jsonBuses);
+			JSONObject jsonBusData;
+			JSONArray jsonBusBounds;
+			JSONObject jsonBoundData;
+			JSONArray jsonBoundStops;
+			JSONObject jsonStopData;
 			for (b = 0; b < busamount; b++){
+				jsonBusData = new JSONObject();
 				pb.setValue(b + 1);
 				buslist = data.get(b);
 				busname = bus_db[b];
 				boundamount = buslist.size();
 				lblStatus.setText("Status: Saving data for bus " + busname);
-				prop.setProperty(busname + "-bounds", Integer.toString(boundamount));
+				jsonBusData.put("name", busname);
+				jsonBusBounds = new JSONArray();
+				jsonBusData.put("bounds", jsonBusBounds);
 				for (bd = 1; bd <= boundamount; bd++){
 					boundlist = buslist.get(bd - 1);
 					stopamount = boundlist.size();
-					prop.setProperty(busname + "-bound" + bd + "-stops", Integer.toString(stopamount));
+					jsonBoundData = new JSONObject();
+					jsonBoundStops = new JSONArray();
+					jsonBoundData.put("stops", jsonBoundStops);
 					for (st = 0; st < stopamount; st++){
-						prop.setProperty(busname + "-bound" + bd + "-stop" + st + "-stopcode", boundlist.get(st)[1]);
-						prop.setProperty(busname + "-bound" + bd + "-stop" + st + "-stopseq", boundlist.get(st)[2]);
-						prop.setProperty(busname + "-bound" + bd + "-stop" + st + "-stopname", new String(boundlist.get(st)[3].getBytes("UTF-8"), "UTF-8"));
+						jsonStopData = new JSONObject();
+						jsonStopData.put("lat", boundlist.get(st)[0]);
+						jsonStopData.put("lng", boundlist.get(st)[1]);
+						jsonStopData.put("area", boundlist.get(st)[2]);
+						jsonStopData.put("stopcode", boundlist.get(st)[3].replaceAll("[-+.^:,]",""));
+						jsonStopData.put("stopname-eng", boundlist.get(st)[4]);
+						jsonStopData.put("stopname-chi", new String(boundlist.get(st)[5].getBytes("Big5"), "Big5"));
+						jsonStopData.put("addr-eng", boundlist.get(st)[6]);
+						jsonStopData.put("addr-chi", new String(boundlist.get(st)[7].getBytes("Big5"), "Big5"));
+						jsonStopData.put("normal-fare", boundlist.get(st)[8]);
+						jsonStopData.put("air-cond-fare", boundlist.get(st)[9]);
+						jsonStopData.put("stopseq", Integer.toString(st));
+						jsonBoundStops.put(jsonStopData);
 					}
+					jsonBusBounds.put(jsonBoundData);
 				}
+				jsonBuses.put(jsonBusData);
 			}
-			prop.setProperty("bus_db", Integer.toString(bus_db.length));
+			
+			JSONArray jsonRoutes = new JSONArray();
+			outjson.put("routes", jsonRoutes);
 			for (int i = 0; i < bus_db.length; i++){
-				prop.setProperty("bus_db" + i, bus_db[i]);
+				jsonRoutes.put(bus_db[i]);
 			}
-			FileOutputStream out = new FileOutputStream(file);
-			prop.store(out, "KMB Bus Stops Database (Automatically generated)");
+			
+			PrintWriter out = new PrintWriter(file);
+			out.println(outjson.toString());
 			out.flush();
 			out.close();
 			reloadFile();
@@ -206,10 +241,6 @@ public class Autobuild  {
 					properties.setText(builder.toString());
 					Properties prop = new Properties();
 					prop.load(in);
-					String lastbuild = prop.getProperty("lastbuild");
-					String lastbound = prop.getProperty("lastbound");
-					String lastmaxbounds = prop.getProperty("lastmaxbounds");
-					lblBusstopdbproperties.setText("bus_stopdb.properties (Last Build: " + lastbuild + " Last Bound: " + lastbound + " Last Max Bounds: " + lastmaxbounds + ")");
 					fis.close();
 					in.close();
 					pb.setIndeterminate(false);
@@ -326,7 +357,7 @@ public class Autobuild  {
 		return output;
 	}
 	
-	private void func(int lang){
+	private void func(){
 		try {
 			lblStatus.setText("Fetching bus db...");
 			getRoutes();
@@ -343,21 +374,10 @@ public class Autobuild  {
 		try {
 			running = true;
 			lblStatus.setText("Setting up");
-			String language = "eng";
-			switch (lang){
-			default:
-			case 0:
-				language = "eng";
-				break;
-			case 1:
-				language = "chi";
-				break;
-			}
 			JSONArray arr;
 			String busno;
 			String[] busrow;
 			BusDetails busd;
-			langbox.setEnabled(false);
 			List<List<String[]>> buslist;
 			lblStatus.setForeground(Color.BLACK);
 			pb.setIndeterminate(false);
@@ -398,10 +418,6 @@ public class Autobuild  {
 						build = new String[4];
 						busdarr = new String[11];
 						injson = arr.getJSONObject(x);
-						build[0] = Integer.toString(arr.length());
-						build[1] = injson.getString("subarea").replaceAll("[-+.^:,]","");
-						build[2] = Integer.toString(x);
-						build[3] = injson.getString("title_" + language);
 						busdarr[0] = injson.getString("lat");
 						busdarr[1] = injson.getString("lng");
 						busdarr[2] = injson.getString("area");
@@ -415,7 +431,7 @@ public class Autobuild  {
 						busdarr[10] = injson.getString("rel_bus");
 						busd.busstoptablemodel.addRow(busdarr);
 						busd.busstoptablemodel.fireTableDataChanged();
-						boundlist.add(build);
+						boundlist.add(busdarr);
 					}
 					buslist.add(boundlist);
 				}
@@ -427,14 +443,12 @@ public class Autobuild  {
 			lblStatus.setText("Status: Building database... this may takes one to two minutes");
 			save();
 			lblStatus.setText("Status: Ready");
-			langbox.setEnabled(true);
 			btnAutobuild.setEnabled(true);
 			JOptionPane.showMessageDialog(null, "Thank you for using this builder!\nPlease put a star on KmbETA-API and\nKmbETA-DBBuilder to support me!");
 			running = false;
 		} catch (Exception e){
 			e.printStackTrace();
 			running = false;
-			langbox.setEnabled(true);
 			lblStatus.setForeground(Color.RED);
 			lblStatus.setText("Status: Error occurred. Check stack trace.");
 			pb.setIndeterminate(true);
@@ -472,7 +486,7 @@ public class Autobuild  {
 		JPanel panel = new JPanel();
 		frame.getContentPane().add(panel, BorderLayout.CENTER);
 		
-		JLabel lblKmbEtaDatabase = new JLabel("KMB ETA Database Builder v1.5.2 Beta");
+		JLabel lblKmbEtaDatabase = new JLabel("KMB ETA Database Builder v2.0.0 Beta");
 		lblKmbEtaDatabase.setFont(new Font("Tahoma", Font.PLAIN, 33));
 		
 		btnAutobuild = new JButton("Auto-build");
@@ -480,7 +494,7 @@ public class Autobuild  {
 			public void actionPerformed(ActionEvent arg0) {
 			  new Thread(){
 					public void run(){
-						func(langbox.getSelectedIndex());
+						func();
 					}
 				}.start();
 				btnAutobuild.setEnabled(false);
@@ -511,9 +525,6 @@ public class Autobuild  {
 				btnAutobuild.setEnabled(false);
 			}
 		});
-		
-		langbox = new JComboBox();
-		langbox.setModel(new DefaultComboBoxModel(new String[] {"ENGLISH", "CHINESE"}));
 		GroupLayout gl_panel = new GroupLayout(panel);
 		gl_panel.setHorizontalGroup(
 			gl_panel.createParallelGroup(Alignment.TRAILING)
@@ -528,13 +539,11 @@ public class Autobuild  {
 							.addPreferredGap(ComponentPlacement.RELATED)
 							.addComponent(scrollPane_2, GroupLayout.DEFAULT_SIZE, 672, Short.MAX_VALUE))
 						.addGroup(gl_panel.createSequentialGroup()
-							.addComponent(lblKmbEtaDatabase, GroupLayout.DEFAULT_SIZE, 540, Short.MAX_VALUE)
+							.addComponent(lblKmbEtaDatabase, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(langbox, 0, 94, Short.MAX_VALUE)
+							.addComponent(btnSave, GroupLayout.PREFERRED_SIZE, 147, GroupLayout.PREFERRED_SIZE)
 							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnSave, GroupLayout.DEFAULT_SIZE, 57, Short.MAX_VALUE)
-							.addPreferredGap(ComponentPlacement.RELATED)
-							.addComponent(btnAutobuild, GroupLayout.DEFAULT_SIZE, 215, Short.MAX_VALUE)))
+							.addComponent(btnAutobuild, GroupLayout.DEFAULT_SIZE, 206, Short.MAX_VALUE)))
 					.addContainerGap())
 		);
 		gl_panel.setVerticalGroup(
@@ -543,20 +552,19 @@ public class Autobuild  {
 					.addContainerGap()
 					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
 						.addComponent(lblKmbEtaDatabase)
-						.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING, false)
-							.addComponent(langbox, Alignment.LEADING)
+						.addGroup(gl_panel.createParallelGroup(Alignment.TRAILING)
 							.addComponent(btnSave, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-							.addComponent(btnAutobuild, Alignment.LEADING, GroupLayout.DEFAULT_SIZE, 38, Short.MAX_VALUE)))
+							.addComponent(btnAutobuild, Alignment.LEADING, GroupLayout.PREFERRED_SIZE, 38, GroupLayout.PREFERRED_SIZE)))
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(lblStatus)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addComponent(pb, GroupLayout.PREFERRED_SIZE, 25, GroupLayout.PREFERRED_SIZE)
 					.addPreferredGap(ComponentPlacement.RELATED)
-					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 321, Short.MAX_VALUE)
+					.addComponent(scrollPane, GroupLayout.DEFAULT_SIZE, 322, Short.MAX_VALUE)
 					.addPreferredGap(ComponentPlacement.RELATED)
 					.addGroup(gl_panel.createParallelGroup(Alignment.LEADING)
-						.addComponent(scrollPane_2, GroupLayout.DEFAULT_SIZE, 142, Short.MAX_VALUE)
-						.addComponent(scrollPane_1, GroupLayout.DEFAULT_SIZE, 142, Short.MAX_VALUE))
+						.addComponent(scrollPane_2, GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE)
+						.addComponent(scrollPane_1, GroupLayout.DEFAULT_SIZE, 143, Short.MAX_VALUE))
 					.addContainerGap())
 		);
 		
@@ -593,7 +601,7 @@ public class Autobuild  {
 		});
 		splitPane.setLeftComponent(btnReload);
 		
-		lblBusstopdbproperties = new JLabel("bus_stopdb.properties");
+		lblBusstopdbproperties = new JLabel("kmbeta_db.json");
 		lblBusstopdbproperties.setFont(new Font("Tahoma", Font.BOLD, 15));
 		splitPane.setRightComponent(lblBusstopdbproperties);
 		
