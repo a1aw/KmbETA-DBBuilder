@@ -13,6 +13,7 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Calendar;
 import java.util.List;
 import java.util.Properties;
 
@@ -180,12 +181,12 @@ public class Autobuild  {
 						jsonStopData.put("lng", boundlist.get(st)[1]);
 						jsonStopData.put("area", boundlist.get(st)[2]);
 						jsonStopData.put("stopcode", boundlist.get(st)[3].replaceAll("[-+.^:,]",""));
-						jsonStopData.put("stopname-eng", boundlist.get(st)[4]);
-						jsonStopData.put("stopname-chi", new String(boundlist.get(st)[5].getBytes("Big5"), "Big5"));
-						jsonStopData.put("addr-eng", boundlist.get(st)[6]);
-						jsonStopData.put("addr-chi", new String(boundlist.get(st)[7].getBytes("Big5"), "Big5"));
-						jsonStopData.put("normal-fare", boundlist.get(st)[8]);
-						jsonStopData.put("air-cond-fare", boundlist.get(st)[9]);
+						jsonStopData.put("stopname_eng", boundlist.get(st)[4]);
+						jsonStopData.put("stopname_chi", new String(boundlist.get(st)[5].getBytes("Big5"), "Big5"));
+						jsonStopData.put("addr_eng", boundlist.get(st)[6]);
+						jsonStopData.put("addr_chi", new String(boundlist.get(st)[7].getBytes("Big5"), "Big5"));
+						jsonStopData.put("normal_fare", boundlist.get(st)[8]);
+						jsonStopData.put("air_cond_fare", boundlist.get(st)[9]);
 						jsonStopData.put("stopseq", Integer.toString(st));
 						jsonBoundStops.put(jsonStopData);
 					}
@@ -199,7 +200,9 @@ public class Autobuild  {
 			for (int i = 0; i < bus_db.length; i++){
 				jsonRoutes.put(bus_db[i]);
 			}
-			
+			Calendar cal = Calendar.getInstance();
+			outjson.put("generated", cal.getTimeInMillis());
+			outjson.put("generated_human", cal.getTime().toString());
 			PrintWriter out = new PrintWriter(file);
 			out.println(outjson.toString());
 			out.flush();
@@ -215,6 +218,11 @@ public class Autobuild  {
 	}
 	
 	private void reloadFile(){
+		//This will hang the application. Not fixing now.
+		properties.setText("Load file is disabled by developer.");
+		if (true){
+			return;
+		}
 		new Thread(){
 			public void run(){
 				try {
@@ -222,7 +230,7 @@ public class Autobuild  {
 					btnAutobuild.setEnabled(false);
 					pb.setIndeterminate(true);
 					lblStatus.setText("Status: Reloading properties file...");
-					File file = new File("bus_stopdb.properties");
+					File file = new File("kmbeta_db.json");
 					if (!file.exists()){
 						properties.setText("File Not Exist");
 						lblStatus.setText("Status: Ready");
@@ -479,7 +487,7 @@ public class Autobuild  {
 				}
 			}
 		});
-		frame.setTitle("KMB ETA Database Builder v1.5.2 Beta");
+		frame.setTitle("KMB ETA Database Builder v2.0.0 Beta");
 		frame.setBounds(100, 100, 958, 654);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
 		
