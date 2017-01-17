@@ -11,6 +11,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.net.URL;
 import java.net.URLConnection;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -47,6 +48,8 @@ import javax.swing.JTabbedPane;
 import javax.swing.SwingConstants;
 import javax.swing.Timer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.text.DefaultCaret;
+
 import java.awt.event.ActionListener;
 import java.awt.event.ActionEvent;
 import javax.swing.JProgressBar;
@@ -203,8 +206,12 @@ public class Autobuild  {
 			Calendar cal = Calendar.getInstance();
 			outjson.put("generated", cal.getTimeInMillis());
 			outjson.put("generated_human", cal.getTime().toString());
-			PrintWriter out = new PrintWriter(file);
-			out.println(outjson.toString());
+			
+			FileOutputStream out = new FileOutputStream(file);
+			PrintWriter writer = new PrintWriter(out, true);
+			writer.println(outjson.toString());
+			writer.flush();
+			writer.close();
 			out.flush();
 			out.close();
 			reloadFile();
@@ -282,14 +289,14 @@ public class Autobuild  {
 		    String data = "";
 		    try {
 		    	BufferedReader reader = new BufferedReader(new 
-		                InputStreamReader(conn.getInputStream()));
+		                InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
 			    while ((line = reader.readLine()) != null) {
 			        data += line;
 			     }
 		    } catch (Exception e){
-		    	lblStatus.setText("Status: Connection error. Restarting the same proccess in 30 sec (Don't worry it is okay)");
-		    	System.err.println("Error occurred. Restarting the same proccess in 30 seconds.");
-		    	Thread.sleep(30000);
+		    	lblStatus.setText("Status: Connection error. Restarting the same proccess in 10 sec (Don't worry it is okay)");
+		    	System.err.println("Error occurred. Restarting the same proccess in 10 seconds.");
+		    	Thread.sleep(10000);
 		    	lblStatus.setText("Status: Retrying...");
 		    	return search(bn, dir);
 		    }
@@ -304,10 +311,10 @@ public class Autobuild  {
 		    }
 			return new JSONArray(data);
 		} catch (Exception e){
-			printlnLog("Error occurred! However, I am trying to recover! 30 seconds restarting");
-			lblStatus.setText("Status: Connection error. Restarting the same proccess in 30 sec (Don't worry it is okay)");
-	    	System.err.println("Error occurred. Restarting the same proccess in 30 seconds.");
-	    	Thread.sleep(30000);
+			printlnLog("Error occurred! However, I am trying to recover! 10 seconds restarting");
+			lblStatus.setText("Status: Connection error. Restarting the same proccess in 10 sec (Don't worry it is okay)");
+	    	System.err.println("Error occurred. Restarting the same proccess in 10 seconds.");
+	    	Thread.sleep(10000);
 	    	lblStatus.setText("Status: Retrying...");
 			return search(bn, dir);
 		}
@@ -322,7 +329,7 @@ public class Autobuild  {
 	    String data = "";
 	    try {
 	    	BufferedReader reader = new BufferedReader(new 
-	                InputStreamReader(conn.getInputStream()));
+	                InputStreamReader(conn.getInputStream(), StandardCharsets.UTF_8));
 		    while ((line = reader.readLine()) != null) {
 		        data += line;
 		     }
@@ -407,7 +414,7 @@ public class Autobuild  {
 					printlnLog("Trying to get bound " + j +" for " + busno + "...");
 					arr = search(busno, j);
 					if (arr == null){
-						printlnLog("Invaild bound " + j +" for " + busno + " !");
+						printlnLog("No bound " + j +" for " + busno);
 						if (j == 1){
 							System.err.println("ERR: No data is grant " + j +" for " + busno + "...");
 							printlnLog("ERR: No data is grant " + j +" for " + busno + "...");
@@ -417,11 +424,14 @@ public class Autobuild  {
 						}
 						break;
 					}
+					printlnLog("Fetched bound " + j +" for " + busno);
 					busd = new BusDetails();
 					tab.add(busno + " B" + j, busd);
 					String[] build;
 					JSONObject injson;
+					printlnLog("Building structure for bound " + j +" for " + busno + "...");
 					for (x = 0; x < arr.length(); x++){
+						printlnLog("STRUCT: Structing stop " + x + " at bound " + j +" for " + busno + "...");
 						lblStatus.setText("Status: Building " + busno + " stop " + x);
 						build = new String[4];
 						busdarr = new String[11];
@@ -440,8 +450,10 @@ public class Autobuild  {
 						busd.busstoptablemodel.addRow(busdarr);
 						busd.busstoptablemodel.fireTableDataChanged();
 						boundlist.add(busdarr);
+						printlnLog("STRUCT: Finished structing stop " + x + " at bound " + j +" for " + busno + "...");
 					}
 					buslist.add(boundlist);
+					printlnLog("Structure built for bound " + j +" for " + busno);
 				}
 				busrow[0] = bus_db[i];
 				busrow[1] = Integer.toString(j - 1);
@@ -614,9 +626,13 @@ public class Autobuild  {
 		splitPane.setRightComponent(lblBusstopdbproperties);
 		
 		log = new JTextArea();
+		log.setEditable(false);
 		log.setLineWrap(true);
 		log.setWrapStyleWord(true);
-		log.setEditable(false);
+		
+		DefaultCaret caret = (DefaultCaret)log.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+		
 		pb.setStringPainted(true);
 		scrollPane_1.setViewportView(log);
 		
